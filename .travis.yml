@@ -3,14 +3,22 @@ services:
    - docker
 
 before_install:
-   - docker build -t ldkhang/client-test -f ./client/Dockerfile.dev ./client
+   - docker build -t ldkhang/multi-client-test -f ./client/Dockerfile.dev ./client
 
 script:
-   - docker run ldkhang/client-test npm test -- --coverage
+   - docker run ldkhang/multi-client-test npm test -- --coverage
 
 after_success:
-   - docker build -t ldkhang/client-prod ./client
-   - docker build -t ldkhang/nginx-prod ./nginx
-   - docker build -t ldkhang/server-prod ./server
-   - docker build -t ldkhang/worker-prod ./worker
+   - docker build -t ldkhang/multi-client-prod ./client
+   - docker build -t ldkhang/multi-nginx-prod ./nginx
+   - docker build -t ldkhang/multi-server-prod ./server
+   - docker build -t ldkhang/multi-worker-prod ./worker
 
+   # Login to Docker Hub
+   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+   # Upload images to Docker Hub
+   - docker push ldkhang/multi-client-prod
+   - docker push ldkhang/multi-nginx-prod
+   - docker push ldkhang/multi-server-prod
+   - docker push ldkhang/multi-worker-prod
